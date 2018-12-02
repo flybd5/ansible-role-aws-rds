@@ -1,0 +1,18 @@
+---
+# tasks file for ansible-role-aws-rds
+
+- include_tasks: create_rds_subnet.yml
+  loop_control:
+    loop_var: rds
+  with_items:
+    - "{{ aws_rds_rdssubnet }}"
+- include_tasks: create_rds_paramgroup.yml
+  loop_control:
+    loop_var: rds
+  with_items:
+    - "{{ aws_rds_rdsparamgroup }}"
+- include_tasks: create_rds.yml
+  loop_control:
+    loop_var: rds
+  with_items:
+    - "{{ aws_rds_rds }}"

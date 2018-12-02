@@ -1,0 +1,33 @@
+---
+
+###
+### Make all subnet variables empty for this round
+###
+- name: empty all subnet variables to start fresh during this round
+  set_fact:
+    aws_vpc_subnet_by_cidr: []
+    aws_vpc_subnet_by_filter: []
+    aws_vpc_subnets: []
+
+###
+### Loop over subnets
+###
+
+# Subnets by filter
+#
+- include_tasks: _facts_subnet_by_filter.yml
+  loop_control:
+    loop_var: items
+  with_items:
+    - "{{ aws_subnet_filter }}"
+
+###
+### Merge subnets array and return: aws_vpc_subnets
+###
+- name: merge subnets array
+  set_fact:
+    aws_vpc_subnets: "{{ aws_vpc_subnets + [item] }}"
+  with_items:
+    - "{{ aws_vpc_subnet_by_cidr }}"
+    - "{{ aws_vpc_subnet_by_filter }}"
+  when: not ([item] in aws_vpc_subnets)

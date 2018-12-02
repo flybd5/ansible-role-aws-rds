@@ -1,0 +1,15 @@
+---
+# defaults file for ansible-role-aws-iam
+
+##
+### Sane defaults
+###
+
+aws_rds_rds: []
+aws_rds_rdsparamgroup: []
+aws_rds_rdssubnet: []
+aws_rds_rdsgathervpcsubnets: []
+aws_vpc_filter: []
+aws_subnet_filter: []
+aws_vpc_subnet_filter: []
+aws_rds_default_region: 'eu-central-1'

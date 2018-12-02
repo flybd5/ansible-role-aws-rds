@@ -1,0 +1,84 @@
+---
+
+# VPC first
+- name: Fail if name -and- tags are defined, or none defined
+  assert:
+    that:
+      - rds.vpc_name is defined or rds.vpc_tags is defined
+      - not (rds.vpc_name is defined and rds.vpc_tags is defined)
+    msg: "You must specity one of VPC Name -or- Tags, but not both."
+- set_fact:
+    aws_vpc_filter:
+      "tag:Name": "{{ rds.vpc_name }}"
+  when: rds.vpc_name is defined
+- set_fact:
+    aws_vpc_filter: "{{ rds.vpc_tags | get_attr('key', 'val') }}"
+  when: rds.vpc_tags is defined
+
+- name: gather vpc facts by any tag
+  ec2_vpc_net_facts:
+    aws_access_key: "{{ lookup('ENV', 'AWS_ACCESS_KEY') | default(omit) }}"
+    aws_secret_key: "{{ lookup('ENV', 'AWS_SECRET_KEY') | default(omit)  }}"
+    security_token: "{{ lookup('ENV', 'AWS_SECURITY_TOKEN') | default(omit) }}"
+    profile: "{{ rds.profile | default(aws_rds_profile) | default(omit) }}"
+    region: "{{ rds.region | default(aws_rds_default_region) }}"
+    filters: "{{ aws_vpc_filter }}"
+  register: _vpc
+
+- name: fail if count of vpcs found not 1
+  assert:
+    that:
+      - _vpc.vpcs is defined
+      - _vpc.vpcs | length == 1
+    msg: Not exactly one VPC has been found
+
+- name: set vpc id
+  set_fact:
+    aws_vpc_id: "{{ _vpc.vpcs[0].id }}"
+
+# Now subnets
+
+- name: Fail if no subnet filters are defined
+  assert:
+    that:
+      - rds.cidr is defined or
+        rds.filter is defined or
+        rds.name is defined
+      - not (rds.cidr is defined and
+        not rds.filter is defined and
+        rds.name is defined)
+    msg: "For subnet filter you must specify -at least one- of cidr, name or tag filter"
+- set_fact:
+    aws_vpc_subnet_by_cidr: []
+    aws_vpc_subnet_by_filter: []
+    aws_vpc_subnets: []
+- set_fact:
+    aws_subnet_filter: "{{ rds.subnets }}"
+  when: rds.subnets is defined
+- include_tasks: gather_facts_subnets.yml
+  when: rds.subnets is defined
+
+- name: Fail if no subnets found
+  assert:
+    that:
+      - aws_vpc_subnets is defined
+      - aws_vpc_subnets | length > 0
+    msg: "Defined filters did not return any matching subnets"
+
+
+# Finally create the subnet
+- name: ensure rds subnet group is created
+  rds_subnet_group:
+    # Fixed values
+    state: present
+    # Required values
+    name: "{{ rds.name }}"
+    subnets: "{{ aws_vpc_subnets }}"
+    # Optional values
+    region: "{{ rds.region | default(aws_rds_default_region | default(omit)) }}"
+    aws_access_key: "{{ lookup('ENV', 'AWS_ACCESS_KEY') | default(omit) }}"
+    aws_secret_key: "{{ lookup('ENV', 'AWS_SECRET_KEY') | default(omit) }}"
+    security_token: "{{ lookup('ENV', 'AWS_SECURITY_TOKEN') | default(omit) }}"
+    profile: "{{ rds.profile | default(aws_rds_profile) | default(omit) }}"
+    description: "{{ rds.description | default('') }}"
+    ec2_url: "{{ rds.ec2_url | default(omit) }}"

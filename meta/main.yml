@@ -1,0 +1,18 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: Juan Jimenez
+  license: Apache 2.0
+  description: Creates an arbitrary number of RDS instances, a param group, subnet and gathers VPC subnets on AWS
+  min_ansible_version: 2.5
+  platforms:
+    - name: all
+      versions:
+        - all
+  galaxy_tags:
+    - AWS
+    - aws
+    - amazon
+    - cloud
+    - rds

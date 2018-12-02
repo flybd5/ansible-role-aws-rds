@@ -1,0 +1,42 @@
+---
+
+- name: ensure rds instance is created
+  rds:
+    # Required values
+    instance_name: "{{ rds.instance_name }}"
+    command: create
+    db_engine: "{{ rds.db_engine | default('MySQL') }}"
+    instance_type: "{{ rds.instance_type }}"
+    username: "{{ rds.username }}"
+    password: "{{ rds.password }}"
+    size: "{{ rds.size }}"
+    subnet: "{{ rds.subnet }}"
+    zone: "{{ rds.zone }}"
+    # Optional values
+    tags: "{{ rds.tags | default({}) | get_attr('key', 'val') }}"
+    region: "{{ rds.region | default(aws_rds_default_region) }}"
+    aws_access_key: "{{ lookup('ENV', 'AWS_ACCESS_KEY') | default(omit) }}"
+    aws_secret_key: "{{ lookup('ENV', 'AWS_SECRET_KEY') | default(omit) }}"
+    security_token: "{{ lookup('ENV', 'AWS_SECURITY_TOKEN') | default(omit) }}"
+    profile: "{{ rds.profile | default(aws_rds_profile) | default(omit) }}"
+    apply_immediately: "{{ rds.apply_immediately | default(omit) }}"
+    backup_retention: "{{ rds.backup_retention | default(omit) }}"
+    backup_window: "{{ rds.backup_window | default(omit) }}"
+    character_set_name: "{{ rds.character_set_name | default(omit) }}"
+    db_name: "{{ rds.db_name | default(omit) }}"
+    engine_version: "{{ rds.engine_version | default(omit) }}"
+    iops: "{{ rds.iops | default(omit) }}"
+    license_model: "{{ rds.license_model | default ('general-public-license') }}"
+    maint_window: "{{ rds.maint_window | default(omit) }}"
+    multi_zone: "{{ rds.multi_zone | default(false) }}"
+    option_group: "{{ rds.option_group | default(omit) }}"
+    parameter_group: "{{ rds.parameter_group | default(omit) }}"
+    port: "{{ rds.port | default(omit) }}"
+    publicly_accessible: "{{ rds.public_accessible | default(false) }}"
+    security_groups: "{{ rds.security_groups | default(omit) }}"
+    upgrade: "{{ rds.upgrade | default(false) }}"
+    validate_certs: "{{ rds.validate_certs | default(true) }}"
+    vpc_security_groups: "{{ rds.vpc_security_groups | default(omit) }}"
+    wait: "{{ rds.wait | default(false) }}"
+    wait_timeout: "{{ rds.wait_timeout | default(omit) }}"
+  register: rds_creation_result

@@ -1,0 +1,20 @@
+---
+
+- name: ensure rds parameter group is created
+  rds_param_group:
+    # Fixed values
+    state: present
+    # Required values
+    name: "{{ rds.name }}"
+    params: "{{ rds.params }}"
+    engine: "{{ rds.engine }}"
+    # Optional values
+    tags: "{{ rds.tags | default({}) | get_attr('key', 'val') }}"
+    region: "{{ rds.region | default(aws_rds_default_region) }}"
+    aws_access_key: "{{ lookup('ENV', 'AWS_ACCESS_KEY') | default(omit) }}"
+    aws_secret_key: "{{ lookup('ENV', 'AWS_SECRET_KEY') | default(omit) }}"
+    security_token: "{{ lookup('ENV', 'AWS_SECURITY_TOKEN') | default(omit) }}"
+    profile: "{{ rds.profile | default(aws_rds_profile) | default(omit) }}"
+    description: "{{ rds.description | default(omit) }}"
+    immediate: "{{ rds.immediate | rds.apply_immediately | default(true) }}"
+    purge_tags: "{{ rds.purge_tags | default(True) }}"
