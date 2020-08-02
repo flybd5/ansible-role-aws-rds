@@ -1,2 +1,2 @@
-tasks/*.yml linguist-detectable
-filter_plugins/*.py -linguist-vendored
+* linguist-vendored
+*.yml linguist-vendored=false
