@@ -1,1 +1,1 @@
-*.yml linguist-language=yaml
+tasks/*.yml linguist-language=yaml
