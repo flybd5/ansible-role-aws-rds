@@ -1,1 +1,2 @@
 tasks/*.yml linguist-language=yaml
+filter_plugins/*.py -linguist-detectable
